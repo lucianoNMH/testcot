@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cotización</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 1em;
+            background: #f5f5f5;
+            line-height: 1.5;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 2em;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 2em;
+            font-size: 2em;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5em;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            color: #34495e;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .categoria-block {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1.5em;
+            margin-bottom: 1.5em;
+            background: #fafafa;
+        }
+        
+        .item-row {
+            display: grid;
+            grid-template-columns: 80px 1fr auto auto;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        @media (max-width: 768px) {
+            .item-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .item-nombre {
+                order: -1;
+            }
+        }
+        
+        .cantidad-input {
+            width: 70px;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .precio-input {
+            width: 100px;
+            text-align: right;
+            background: #f8f9fa;
+        }
+        
+        .total-item {
+            width: 120px;
+            text-align: right;
+            font-weight: bold;
+            background: #e8f5e8;
+            border: 2px solid #4CAF50;
+            color: #2e7d32;
+        }
+        
+        .item-nombre {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .precio-unitario {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        
+        .total-categoria {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            text-align: right;
+        }
+        
+        .total-categoria input {
+            background: white;
+            color: #333;
+            font-weight: bold;
+            font-size: 1.1em;
+            width: 150px;
+        }
+        
+        .total-general {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            border-radius: 12px;
+            font-size: 1.8em;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .loading {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 20px;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .resultado-cotizacion {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .resumen-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .resumen-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🧾 Crear Cotización</h2>
+        
+        <div class="form-group">
+            <label>👤 Cliente:</label>
+            <input id="cliente" placeholder="Nombre del cliente">
+        </div>
+        
+        <div class="form-group">
+            <label>📅 Fecha del evento:</label>
+            <input id="fecha" type="date">
+        </div>
+        
+        <div class="form-group">
+            <label>📍 Lugar:</label>
+            <input id="lugar" placeholder="Ubicación del evento">
+        </div>
+        
+        <div class="form-group">
+            <label>📝 Referencia:</label>
+            <input id="referencia" placeholder="Referencia adicional">
+        </div>
+        
+        <div id="bloquesCategorias"></div>
+        <button class="btn" onclick="agregarCategoria()">➕ Agregar Categoría</button>
+        
+        <div id="totalGeneral" class="total-general" style="display: none;">
+            💰 TOTAL GENERAL: $<span id="montoTotalGeneral">0</span>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="btn btn-primary" onclick="generarCotizacion()">📋 Generar Cotización</button>
+            <button class="btn" onclick="descargarPDF()">📄 Descargar PDF</button>
+            <button class="btn" onclick="compartirWhatsApp()">📱 Compartir por WhatsApp</button>
+        </div>
+        
+        <div id="resultadoCotizacion" class="resultado-cotizacion">
+            <h3>📋 Resumen de Cotización</h3>
+            <div id="resumenItems"></div>
+        </div>
+    </div>
+
+    <script>
+        let inventario = [
+            {
+                categoria: "🎵 Audio",
+                items: [
+                    { nombre: "Micrófono inalámbrico", precio: 15000 },
+                    { nombre: "Altavoz 15W", precio: 25000 },
+                    { nombre: "Mesa de mezclas", precio: 45000 },
+                    { nombre: "Parlante activo 12''", precio: 35000 },
+                    { nombre: "Sistema de sonido completo", precio: 80000 }
+                ]
+            },
+            {
+                categoria: "💡 Iluminación",
+                items: [
+                    { nombre: "Foco LED 50W", precio: 8000 },
+                    { nombre: "Barra de LEDs", precio: 12000 },
+                    { nombre: "Controlador DMX", precio: 35000 },
+                    { nombre: "Par LED RGB", precio: 18000 },
+                    { nombre: "Máquina de humo", precio: 25000 }
+                ]
+            },
+            {
+                categoria: "🏗️ Estructuras",
+                items: [
+                    { nombre: "Truss 2m", precio: 18000 },
+                    { nombre: "Base para truss", precio: 12000 },
+                    { nombre: "Tarima 2x1m", precio: 22000 },
+                    { nombre: "Escenario modular 4x3m", precio: 65000 },
+                    { nombre: "Backdrop", precio: 15000 }
+                ]
+            },
+            {
+                categoria: "🎥 Audiovisual",
+                items: [
+                    { nombre: "Proyector HD", precio: 40000 },
+                    { nombre: "Pantalla 3x2m", precio: 28000 },
+                    { nombre: "Cámara 4K", precio: 55000 },
+                    { nombre: "Switcher de video", precio: 45000 }
+                ]
+            }
+        ];
+        
+        let bloques = 0;
+        let cotizacionActual = null;
+        
+        function agregarCategoria() {
+            const cont = document.getElementById("bloquesCategorias");
+            const bloque = document.createElement("div");
+            bloque.className = "categoria-block";
+            bloque.id = "cat_" + bloques;
+            
+            bloque.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <select onchange="cargarItems('${bloque.id}', this.value)" style="flex: 1; margin-right: 15px;">
+                        <option value="">Seleccionar categoría</option>
+                        ${inventario.map(c => `<option value="${c.categoria}">${c.categoria}</option>`).join('')}
+                    </select>
+                    <button class="btn" onclick="eliminarCategoria('${bloque.id}')" style="background: #e74c3c; padding: 10px 15px;">🗑️</button>
+                </div>
+                
+                <div class="items-div"></div>
+                
+                <div class="total-categoria" style="display: none;">
+                    <div class="checkbox-container">
+                        <input type="checkbox" id="editarTotal_${bloque.id}" onchange="toggleTotalCategoriaEditable(this, '${bloque.id}')">
+                        <label for="editarTotal_${bloque.id}">✏️ Editar total manualmente</label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; justify-content: flex-end;">
+                        <span style="font-size: 1.2em;">Total Categoría: $</span>
+                        <input type="number" 
+                               id="totalCat_${bloque.id}" 
+                               class="precio-input" 
+                               value="0" 
+                               readonly
+                               onchange="calcularTotalGeneral()" />
+                    </div>
+                </div>
+            `;
+            
+            cont.appendChild(bloque);
+            bloques++;
+        }
+        
+        function eliminarCategoria(bloqueId) {
+            const bloque = document.getElementById(bloqueId);
+            if (bloque && confirm('¿Estás seguro de eliminar esta categoría?')) {
+                bloque.remove();
+                calcularTotalGeneral();
+            }
+        }
+        
+        function cargarItems(bloqueId, categoria) {
+            const bloque = document.getElementById(bloqueId);
+            const div = bloque.querySelector(".items-div");
+            const totalCatDiv = bloque.querySelector(".total-categoria");
+            div.innerHTML = "";
+            
+            const catData = inventario.find(c => c.categoria === categoria);
+            if (!catData) return;
+            
+            catData.items.forEach((item, i) => {
+                const itemRow = document.createElement("div");
+                itemRow.className = "item-row";
+                itemRow.innerHTML = `
+                    <input type="number" 
+                           name="cant_${bloqueId}_${i}" 
+                           data-nombre="${item.nombre}" 
+                           data-categoria="${categoria}"
+                           data-precio="${item.precio}" 
+                           min="0" 
+                           value="0" 
+                           class="cantidad-input"
+                           onchange="calcularTotales()" 
+                           placeholder="Cant." />
+                    
+                    <div class="item-nombre">
+                        ${item.nombre}
+                        <div class="precio-unitario">💰 $${item.precio.toLocaleString()}</div>
+                    </div>
+                    
+                    <input type="number" 
+                           id="precio_${bloqueId}_${i}"
+                           class="precio-input" 
+                           value="${item.precio}" 
+                           readonly 
+                           placeholder="Precio" />
+                    
+                    <input type="text" 
+                           id="total_${bloqueId}_${i}"
+                           class="total-item" 
+                           value="$0" 
+                           readonly 
+                           placeholder="Total" />
+                `;
+                div.appendChild(itemRow);
+            });
+            
+            totalCatDiv.style.display = "block";
+            calcularTotales();
+        }
+        
+        function toggleTotalCategoriaEditable(checkbox, bloqueId) {
+            const totalInput = document.getElementById(`totalCat_${bloqueId}`);
+            if (checkbox.checked) {
+                totalInput.readonly = false;
+                totalInput.style.background = '#fff';
+            } else {
+                totalInput.readonly = true;
+                totalInput.style.background = '#f8f9fa';
+                calcularTotales();
+            }
+        }
+        
+        function calcularTotales() {
+            const bloquesDom = document.querySelectorAll(".categoria-block");
+            
+            bloquesDom.forEach(bloque => {
+                const cat = bloque.querySelector("select").value;
+                if (!cat) return;
+                
+                let totalCategoria = 0;
+                const cantInputs = bloque.querySelectorAll("input[type=number][name^='cant_']");
+                
+                cantInputs.forEach(input => {
+                    const cantidad = parseInt(input.value) || 0;
+                    const itemId = input.name.replace('cant_', '');
+                    const precioInput = document.getElementById(`precio_${itemId}`);
+                    const totalInput = document.getElementById(`total_${itemId}`);
+                    
+                    if (precioInput && totalInput) {
+                        const precio = parseFloat(precioInput.value) || 0;
+                        const total = cantidad * precio;
+                        totalInput.value = `$${total.toLocaleString()}`;
+                        totalCategoria += total;
+                    }
+                });
+                
+                const totalCatInput = bloque.querySelector(`input[id^="totalCat_"]`);
+                const checkboxEditar = bloque.querySelector('input[type="checkbox"]');
+                
+                if (totalCatInput && !checkboxEditar.checked) {
+                    totalCatInput.value = totalCategoria;
+                }
+            });
+            
+            calcularTotalGeneral();
+        }
+        
+        function calcularTotalGeneral() {
+            let totalGeneral = 0;
+            
+            document.querySelectorAll(".categoria-block").forEach(bloque => {
+                const totalCatInput = bloque.querySelector(`input[id^="totalCat_"]`);
+                if (totalCatInput) {
+                    totalGeneral += parseFloat(totalCatInput.value) || 0;
+                }
+            });
+            
+            const totalGeneralDiv = document.getElementById("totalGeneral");
+            const montoTotalGeneral = document.getElementById("montoTotalGeneral");
+            
+            if (totalGeneral > 0) {
+                totalGeneralDiv.style.display = "block";
+                montoTotalGeneral.textContent = totalGeneral.toLocaleString();
+            } else {
+                totalGeneralDiv.style.display = "none";
+            }
+        }
+        
+        function generarCotizacion() {
+            const data = {
+                cliente: document.getElementById("cliente").value,
+                fecha_evento: document.getElementById("fecha").value,
+                lugar: document.getElementById("lugar").value,
+                referencia: document.getElementById("referencia").value,
+                items: [],
+                total_general: 0,
+                fecha_cotizacion: new Date().toLocaleDateString()
+            };
+            
+            if (!data.cliente.trim()) {
+                alert("⚠️ Por favor ingresa el nombre del cliente");
+                return;
+            }
+            
+            document.querySelectorAll(".categoria-block").forEach(bloque => {
+                const cat = bloque.querySelector("select").value;
+                if (!cat) return;
+                
+                const cantInputs = bloque.querySelectorAll("input[type=number][name^='cant_']");
+                cantInputs.forEach(input => {
+                    const cantidad = parseInt(input.value) || 0;
+                    if (cantidad > 0) {
+                        const nombre = input.getAttribute('data-nombre');
+                        const categoria = input.getAttribute('data-categoria');
+                        const precio = parseFloat(input.getAttribute('data-precio')) || 0;
+                        const total = cantidad * precio;
+                        
+                        data.items.push({
+                            categoria,
+                            nombre,
+                            cantidad,
+                            precio_unitario: precio,
+                            total
+                        });
+                    }
+                });
+                
+                const totalCatInput = bloque.querySelector(`input[id^="totalCat_"]`);
+                if (totalCatInput) {
+                    data.total_general += parseFloat(totalCatInput.value) || 0;
+                }
+            });
+            
+            if (data.items.length === 0) {
+                alert("⚠️ Debes seleccionar al menos un item");
+                return;
+            }
+            
+            cotizacionActual = data;
+            mostrarResumen(data);
+            
+            // Scroll to results
+            document.getElementById("resultadoCotizacion").scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function mostrarResumen(data) {
+            const resumenDiv = document.getElementById("resumenItems");
+            const resultadoDiv = document.getElementById("resultadoCotizacion");
+            
+            let html = `
+                <div class="resumen-item"><strong>Cliente:</strong> <span>${data.cliente}</span></div>
+                <div class="resumen-item"><strong>Fecha evento:</strong> <span>${data.fecha_evento || 'No especificada'}</span></div>
+                <div class="resumen-item"><strong>Lugar:</strong> <span>${data.lugar || 'No especificado'}</span></div>
+                <div class="resumen-item"><strong>Referencia:</strong> <span>${data.referencia || 'No especificada'}</span></div>
+                <hr>
+            `;
+            
+            data.items.forEach(item => {
+                html += `
+                    <div class="resumen-item">
+                        <span>${item.nombre} (x${item.cantidad})</span>
+                        <span>$${item.total.toLocaleString()}</span>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <hr>
+                <div class="resumen-item">
+                    <span><strong>TOTAL GENERAL</strong></span>
+                    <span><strong>$${data.total_general.toLocaleString()}</strong></span>
+                </div>
+            `;
+            
+            resumenDiv.innerHTML = html;
+            resultadoDiv.style.display = "block";
+        }
+        
+        function descargarPDF() {
+            if (!cotizacionActual) {
+                alert("⚠️ Primero debes generar la cotización");
+                return;
+            }
+            
+            // Aquí podrías integrar una librería como jsPDF
+            alert(`📄 Función de descarga PDF en desarrollo.\n\nPuedes copiar la información mostrada o implementar jsPDF para generar el PDF automáticamente.`);
+        }
+        
+        function compartirWhatsApp() {
+            if (!cotizacionActual) {
+                alert("⚠️ Primero debes generar la cotización");
+                return;
+            }
+            
+            let mensaje = `🧾 *COTIZACIÓN*\n\n`;
+            mensaje += `👤 *Cliente:* ${cotizacionActual.cliente}\n`;
+            mensaje += `📅 *Fecha evento:* ${cotizacionActual.fecha_evento || 'No especificada'}\n`;
+            mensaje += `📍 *Lugar:* ${cotizacionActual.lugar || 'No especificado'}\n\n`;
+            mensaje += `📋 *ITEMS:*\n`;
+            
+            cotizacionActual.items.forEach(item => {
+                mensaje += `• ${item.nombre} (x${item.cantidad}) - $${item.total.toLocaleString()}\n`;
+            });
+            
+            mensaje += `\n💰 *TOTAL: $${cotizacionActual.total_general.toLocaleString()}*`;
+            
+            const url = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+        }
+        
+        // Agregar una categoría inicial
+        window.addEventListener('load', function() {
+            // Opcional: agregar una categoría por defecto
+        });
+    </script>
+</body>
+</html>
